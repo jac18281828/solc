@@ -37,14 +37,22 @@ FROM debian:stable-slim
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt update && \
   apt install -y -q --no-install-recommends \
-  git gnupg2 curl build-essential \
-  ca-certificates apt-transport-https && \
+    git gnupg2 curl build-essential \
+    ca-certificates apt-transport-https \
+    python3 \
+    && \
   apt clean && \
   rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /solc
+
+COPY ./bin/sha3sum /usr/local/bin/sha3sum
 
 # SOLC
 COPY --from=builder /usr/local/bin/solc /usr/local/bin
 COPY --from=builder /usr/local/bin/yul-phaser /usr/local/bin
 COPY --from=builder /usr/local/bin/solidity-upgrade /usr/local/bin
+
+RUN for exe in solc yul-phaser solidity-upgrade; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
 
 RUN solc --version
