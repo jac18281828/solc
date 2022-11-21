@@ -16,7 +16,8 @@ Build requires BuildKit TARGETARCH
 ## Example Dockerfile
 
 ```
-FROM jac18281828/solc:latest
+FROM ghcr.io/jac18281828/solc:latest
 
 ```
-# solc
+
+

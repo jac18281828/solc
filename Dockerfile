@@ -30,6 +30,8 @@ RUN echo 8df45f5f8632da4817bc7ceb81497518f298d290 | tee ../commit_hash.txt && \
     make install \
     || :
 
+RUN for exe in solc yul-phaser solidity-upgrade; do echo strip ${exe}; strip /usr/local/bin/${exe}; done
+
 FROM debian:stable-slim
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
@@ -41,5 +43,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   rm -rf /var/lib/apt/lists/*
 
 # SOLC
-COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /usr/local/bin/solc /usr/local/bin
+COPY --from=builder /usr/local/bin/yul-phaser /usr/local/bin
+COPY --from=builder /usr/local/bin/solidity-upgrade /usr/local/bin
+
 RUN solc --version
