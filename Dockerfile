@@ -25,6 +25,7 @@ RUN tar -zxvf /solidity/solidity-${SOLC_VERSION}.tar.gz -C /solidity
 WORKDIR /solidity/solidity-${SOLC_VERSION}/build
 # disable tests on arm due to the length of build in intel emulation
 RUN echo 8df45f5f8632da4817bc7ceb81497518f298d290 | tee ../commit_hash.txt && \
+    [[ "$TARGETARCH" = "arm64" ]] && export CFLAGS=-mno-outline-atomics || true && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
     CMAKE_BUILD_PARALLEL_LEVEL=2 cmake --build . --config Release && \
     make install \
@@ -56,3 +57,13 @@ COPY --from=builder /usr/local/bin/solidity-upgrade /usr/local/bin
 RUN for exe in solc yul-phaser solidity-upgrade; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
 
 RUN solc --version
+
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.name="solc" \
+    org.label-schema.description="SOLC Development Container" \
+    org.label-schema.url="https://github.com/jac18281828/solc" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="git@github.com:jac18281828/solc.git" \
+    org.label-schema.vendor="John Cairns" \
+    org.label-schema.version=$VERSION \
+    org.label-schema.schema-version="1.0"
