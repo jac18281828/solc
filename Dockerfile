@@ -53,7 +53,7 @@ COPY ./bin/sha3sum /usr/local/bin/sha3sum
 COPY --from=builder /usr/local/bin/solc /usr/local/bin
 COPY --from=builder /usr/local/bin/yul-phaser /usr/local/bin
 
-RUN for exe in solc yul-phaser solidity-upgrade; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
+RUN for exe in solc yul-phaser; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
 
 RUN solc --version
 
