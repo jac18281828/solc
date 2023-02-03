@@ -26,10 +26,11 @@ WORKDIR /solidity/solidity-${SOLC_VERSION}/build
 # disable tests on arm due to the length of build in intel emulation
 RUN echo 87f61d960cceab32489350726a99c050e6f92c61 | tee ../commit_hash.txt && \
     THREAD_NUMBER=$(cat /proc/cpuinfo | grep processor | wc -l) && \
-    echo "using ${THREAD_NUMBER} threads" && \
-    [[ "$TARGETARCH" = "arm64" ]] && export CFLAGS=-mno-outline-atomics || true && \
+    MAX_THREADS=$(( THREAD_NUMBER > 4 ?  4 : THREAD_NUMBER )) && \
+    echo "now building with ${MAX_THREADS} threads" && \
+    [ "$TARGETARCH" = "arm64" ] && export CFLAGS=-mno-outline-atomics || true && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
-    CMAKE_BUILD_PARALLEL_LEVEL=${THREAD_NUMBER} cmake --build . --config Release && \
+    CMAKE_BUILD_PARALLEL_LEVEL=${MAX_THREADS} cmake --build . --config Release && \
     make install \
     || :
 
