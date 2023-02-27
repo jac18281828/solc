@@ -1,4 +1,5 @@
 FROM debian:stable-slim as builder
+ARG MAXIMUM_THREADS=4
 
 # defined from build kit
 # DOCKER_BUILDKIT=1 docker build . -t ...
@@ -18,16 +19,17 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ## SOLC
 WORKDIR /solidity
 
-ARG SOLC_VERSION=0.8.18
-ADD https://github.com/ethereum/solidity/archive/refs/tags/v${SOLC_VERSION}.tar.gz /solidity/solidity-${SOLC_VERSION}.tar.gz
-RUN tar -zxvf /solidity/solidity-${SOLC_VERSION}.tar.gz -C /solidity
+ARG SOLC_VERSION=0.8.19
+ADD https://github.com/ethereum/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
+RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
-WORKDIR /solidity/solidity-${SOLC_VERSION}/build
+WORKDIR /solidity/solidity_${SOLC_VERSION}/build
+RUN ls -l
 # disable tests on arm due to the length of build in intel emulation
-RUN echo 87f61d960cceab32489350726a99c050e6f92c61 | tee ../commit_hash.txt && \
+RUN echo 7dd6d404815651b2341ecae220709a88aaed4038 | tee ../commit_hash.txt && \
     THREAD_NUMBER=$(cat /proc/cpuinfo | grep processor | wc -l) && \
-    MAX_THREADS=$(( THREAD_NUMBER > 4 ?  4 : THREAD_NUMBER )) && \
-    echo "now building with ${MAX_THREADS} threads" && \
+    MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
+    echo "building with ${MAX_THREADS} threads" && \
     [ "$TARGETARCH" = "arm64" ] && export CFLAGS=-mno-outline-atomics || true && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
     CMAKE_BUILD_PARALLEL_LEVEL=${MAX_THREADS} cmake --build . --config Release && \
@@ -58,7 +60,7 @@ COPY --from=builder /usr/local/bin/yul-phaser /usr/local/bin
 
 RUN for exe in solc yul-phaser; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
 
-RUN solc --version
+CMD solc --version
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="solc" \
