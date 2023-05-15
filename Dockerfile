@@ -1,5 +1,5 @@
 FROM debian:stable-slim as builder
-ARG MAXIMUM_THREADS=4
+ARG MAXIMUM_THREADS=8
 
 # defined from build kit
 # DOCKER_BUILDKIT=1 docker build . -t ...
@@ -9,7 +9,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   apt update && \
   apt install -y -q --no-install-recommends \
     git curl gnupg2 build-essential \
-    cmake g++-10 libboost-all-dev libc6-dev \ 
+    cmake libboost-all-dev libc6-dev \
     openssl libssl-dev pkg-config \
     ca-certificates apt-transport-https \
   python3 && \
@@ -19,18 +19,18 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ## SOLC
 WORKDIR /solidity
 
-ARG SOLC_VERSION=0.8.19
+ARG SOLC_VERSION=0.8.20
 ADD https://github.com/ethereum/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
 RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
 WORKDIR /solidity/solidity_${SOLC_VERSION}/build
-RUN ls -l
+
+# https://github.com/ethereum/solidity/commit/a1b79de64235f13e6b06e088fe6365c5a12d13d3
 # disable tests on arm due to the length of build in intel emulation
-RUN echo 7dd6d404815651b2341ecae220709a88aaed4038 | tee ../commit_hash.txt && \
+RUN echo a1b79de64235f13e6b06e088fe6365c5a12d13d3 | tee ../commit_hash.txt && \
     THREAD_NUMBER=$(cat /proc/cpuinfo | grep processor | wc -l) && \
     MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
     echo "building with ${MAX_THREADS} threads" && \
-    [ "$TARGETARCH" = "arm64" ] && export CFLAGS=-mno-outline-atomics || true && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
     CMAKE_BUILD_PARALLEL_LEVEL=${MAX_THREADS} cmake --build . --config Release && \
     make install \
