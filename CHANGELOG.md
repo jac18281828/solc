@@ -1,3 +1,7 @@
+# 0.8.20_1 (2023-06-01)
+
+* set DESCRIPTION label
+
 # 0.8.20 (2023-05-15)
 
 * solc 0.8.20 compiler
