@@ -1,3 +1,7 @@
+# 0.8.21 (2023-07-25)
+
+* Solidity compiler 0.8.21
+
 # 0.8.20_1 (2023-06-01)
 
 * set DESCRIPTION label

@@ -19,15 +19,16 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ## SOLC
 WORKDIR /solidity
 
-ARG SOLC_VERSION=0.8.20
+ARG SOLC_VERSION=0.8.21
 ADD https://github.com/ethereum/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
 RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
 WORKDIR /solidity/solidity_${SOLC_VERSION}/build
 
-# https://github.com/ethereum/solidity/commit/a1b79de64235f13e6b06e088fe6365c5a12d13d3
+
+# https://github.com/ethereum/solidity/commit/d9974bed7134e043f7ccc593c0c19c67d2d45dc4
 # disable tests on arm due to the length of build in intel emulation
-RUN echo a1b79de64235f13e6b06e088fe6365c5a12d13d3 | tee ../commit_hash.txt && \
+RUN echo d9974bed7134e043f7ccc593c0c19c67d2d45dc4 | tee ../commit_hash.txt && \
     THREAD_NUMBER=$(cat /proc/cpuinfo | grep processor | wc -l) && \
     MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
     echo "building with ${MAX_THREADS} threads" && \
