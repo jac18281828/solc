@@ -29,7 +29,7 @@ WORKDIR /solidity/solidity_${SOLC_VERSION}/build
 # https://github.com/ethereum/solidity/commit/d9974bed7134e043f7ccc593c0c19c67d2d45dc4
 # disable tests on arm due to the length of build in intel emulation
 RUN echo d9974bed7134e043f7ccc593c0c19c67d2d45dc4 | tee ../commit_hash.txt && \
-    THREAD_NUMBER=$(cat /proc/cpuinfo | grep processor | wc -l) && \
+    THREAD_NUMBER=$(cat /proc/cpuinfo | grep -c ^processor) && \
     MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
     echo "building with ${MAX_THREADS} threads" && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
