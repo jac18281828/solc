@@ -1,6 +1,6 @@
 # SOLC Docker image
 
-SOLC: 0.8.20
+SOLC: 0.8.21
 
 ### Building
 
