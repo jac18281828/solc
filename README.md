@@ -1,5 +1,7 @@
 # SOLC Docker image
 
+![SOLC](solc.png)
+
 ### Building
 
 Build requires BuildKit TARGETARCH
