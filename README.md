@@ -1,7 +1,5 @@
 # SOLC Docker image
 
-SOLC: 0.8.21
-
 ### Building
 
 Build requires BuildKit TARGETARCH
@@ -19,5 +17,3 @@ Build requires BuildKit TARGETARCH
 FROM ghcr.io/jac18281828/solc:latest
 
 ```
-
-
