@@ -19,7 +19,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ## SOLC
 WORKDIR /solidity
 
-ARG SOLC_VERSION=0.8.23
+ARG SOLC_VERSION=0.8.24
 ADD https://github.com/ethereum/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
 RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
