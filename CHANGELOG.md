@@ -1,3 +1,7 @@
+# 0.8.26 (2024-05-30)
+
+* Solidity compiler 0.8.26
+
 # 0.8.25 (2024-04-05)
 
 * Solidity compiler 0.8.25
