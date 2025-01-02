@@ -7,5 +7,5 @@ PROJECT=jac18281828/solc
 # cross platform
 # --platform=amd64
 DOCKER_BUILDKIT=1 docker build --progress plain . -t ${PROJECT}:${VERSION} \
-                  --build-arg VERSION=${VERSION} --build-arg MAXIMUM_THREAD=8 && \
+                  --build-arg VERSION=${VERSION} --build-arg MAXIMUM_THREAD=16 && \
     docker run --rm -i -t ${PROJECT}:${VERSION}
