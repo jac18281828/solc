@@ -1,50 +1,39 @@
 name: Deploy Image Build Push CI
-
 on:
   push:
     tags:
       - "*"
-
 concurrency:
   group: "docker-image"
   cancel-in-progress: true
-
 env:
   DOCKER_BUILDKIT: "1"
-
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      -
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Login to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      -
-        name: Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Generate repository name
+      - name: Generate repository name
         run: |
           echo "REPOSITORY_PATH=$( echo ${GITHUB_REPOSITORY} | tr '[:upper:]' '[:lower:]' )" >> ${GITHUB_ENV}
           echo "REPOSITORY_SHA=$( echo ${GITHUB_SHA} | cut -c 1-7 )" >> ${GITHUB_ENV}
-      -
-        name: Build and Push
+      - name: Build and Push
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -59,14 +48,13 @@ jobs:
             ghcr.io/${{ env.REPOSITORY_PATH }}:v${{ github.ref_name }}
             ghcr.io/${{ env.REPOSITORY_PATH }}:${{ env.REPOSITORY_SHA }}
             ghcr.io/${{ env.REPOSITORY_PATH }}:latest
-      -
-        name: GitHub Release
+      - name: GitHub Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           draft: false
-          prerelease: false        
+          prerelease: false
           tag_name: ${{ github.ref_name }}
           release_name: v${{ github.ref_name }}
           body_path: CHANGELOG.md

@@ -1,3 +1,16 @@
+# Stage 1: Build yamlfmt
+FROM golang:1 AS go-builder
+# defined from build kit
+# DOCKER_BUILDKIT=1 docker build . -t ...
+ARG TARGETARCH
+
+# Install yamlfmt
+WORKDIR /yamlfmt
+RUN go install github.com/google/yamlfmt/cmd/yamlfmt@latest && \
+    strip $(which yamlfmt) && \
+    yamlfmt --version
+
+# Stage 2: solc docker container
 FROM debian:stable-slim AS builder
 ARG MAXIMUM_THREADS=16
 
@@ -33,7 +46,6 @@ RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
 WORKDIR /solidity/solidity_${SOLC_VERSION}/build
 
-
 # https://github.com/ethereum/solidity/commit/7893614a31fbeacd1966994e310ed4f760772658
 # disable tests on arm due to the length of build in intel emulation
 RUN echo 7893614a31fbeacd1966994e310ed4f760772658 | tee ../commit_hash.txt && \
@@ -62,7 +74,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   apt clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir /solc
+COPY --from=go-builder /go/bin/yamlfmt /go/bin/yamlfmt
 
 COPY ./bin/sha3sum /usr/local/bin/sha3sum
 
@@ -70,9 +82,13 @@ COPY ./bin/sha3sum /usr/local/bin/sha3sum
 COPY --from=builder /usr/local/bin/solc /usr/local/bin
 COPY --from=builder /usr/local/bin/yul-phaser /usr/local/bin
 
-RUN for exe in solc yul-phaser; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee /solc/${exe}.sha3; done
+ENV SOLC_PATH=/usr/local/etc/solc
+RUN mkdir -p ${SOLC_PATH}
+RUN for exe in solc yul-phaser; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee ${SOLC_PATH}/${exe}.sha3; done
 
 CMD solc --version
+
+ENV PATH=${PATH}:/usr/local/bin:/go/bin
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="solc" \
