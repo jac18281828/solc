@@ -1,3 +1,9 @@
+# 0.8.35 (2026-06-04)
+
+* Solidity 0.8.35
+* Source now pulled from argotorg/solidity (upstream repository move)
+* Use commit_hash.txt/prerelease.txt bundled in the release tarball instead of a hardcoded hash
+
 # 0.8.30 (2025-05-08)
 
 * Solidity 0.8.30

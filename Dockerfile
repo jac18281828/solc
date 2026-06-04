@@ -40,16 +40,17 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ## SOLC
 WORKDIR /solidity
 
-ARG SOLC_VERSION=0.8.30
-ADD https://github.com/ethereum/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
+ARG SOLC_VERSION=0.8.35
+# The Solidity repository moved from ethereum/solidity to argotorg/solidity.
+# (GitHub still redirects the old release URLs, but argotorg is canonical.)
+ADD https://github.com/argotorg/solidity/releases/download/v${SOLC_VERSION}/solidity_${SOLC_VERSION}.tar.gz /solidity/solidity_${SOLC_VERSION}.tar.gz
 RUN tar -zxf /solidity/solidity_${SOLC_VERSION}.tar.gz -C /solidity
 
 WORKDIR /solidity/solidity_${SOLC_VERSION}/build
 
-# https://github.com/ethereum/solidity/commit/7893614a31fbeacd1966994e310ed4f760772658
-# disable tests on arm due to the length of build in intel emulation
-RUN echo 7893614a31fbeacd1966994e310ed4f760772658 | tee ../commit_hash.txt && \
-    THREAD_NUMBER=$(cat /proc/cpuinfo | grep -c ^processor) && \
+# The release tarball ships commit_hash.txt and prerelease.txt, so the version
+# string is stamped correctly by the build; no need to override the hash here.
+RUN THREAD_NUMBER=$(cat /proc/cpuinfo | grep -c ^processor) && \
     MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
     echo "building with ${MAX_THREADS} threads" && \
     cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
@@ -60,6 +61,11 @@ RUN echo 7893614a31fbeacd1966994e310ed4f760772658 | tee ../commit_hash.txt && \
 RUN for exe in solc yul-phaser; do echo strip ${exe}; strip /usr/local/bin/${exe}; done
 
 FROM debian:stable-slim
+
+# Re-declared in the final stage so the label-schema LABELs below are populated;
+# ARGs do not cross build stages. VERSION is supplied by CI (github.ref_name).
+ARG VERSION
+ARG BUILD_DATE
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt update && \
