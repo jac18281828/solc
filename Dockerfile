@@ -53,7 +53,7 @@ WORKDIR /solidity/solidity_${SOLC_VERSION}/build
 RUN THREAD_NUMBER=$(cat /proc/cpuinfo | grep -c ^processor) && \
     MAX_THREADS=$(( THREAD_NUMBER > ${MAXIMUM_THREADS} ?  ${MAXIMUM_THREADS} : THREAD_NUMBER )) && \
     echo "building with ${MAX_THREADS} threads" && \
-    cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DTESTS=OFF -DSTRICT_Z3_VERSION=OFF -DUSE_CVC4=OFF -DUSE_Z3=OFF -DPEDANTIC=OFF .. && \
     CMAKE_BUILD_PARALLEL_LEVEL=${MAX_THREADS} cmake --build . --config Release && \
     make install \
     || :
