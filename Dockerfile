@@ -92,7 +92,7 @@ ENV SOLC_PATH=/usr/local/etc/solc
 RUN mkdir -p ${SOLC_PATH}
 RUN for exe in solc yul-phaser; do echo ${exe}; sha3sum /usr/local/bin/${exe} | tee ${SOLC_PATH}/${exe}.sha3; done
 
-CMD solc --version
+CMD ["solc", "--version"]
 
 ENV PATH=${PATH}:/usr/local/bin:/go/bin
 
