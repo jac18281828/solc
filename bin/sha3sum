@@ -30,7 +30,7 @@ def output_hash(hash, is_base64):
     
 
 def process_file(filename, is_base64=False):
-    hash = checksum_file(file)
+    hash = checksum_file(filename)
     output_hash(hash, is_base64)
     
 
